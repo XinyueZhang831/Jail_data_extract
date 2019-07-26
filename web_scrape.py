@@ -43,20 +43,26 @@ def find_state(driver):
         list_link = link.get_attribute("href")
         if 'LEA_state' in list_link:
             list_state_herf.append(list_link[11:])
-
+    print(list_state_herf)
     table_trs_state = driver.find_elements_by_xpath("//div[contains(@id, 'col1') and contains(@class, 'scroll')]/table/tbody/tr")
     for tr_state in table_trs_state:
         td = tr_state.find_elements_by_xpath(".//td")
         convert_state = str(td[0].get_attribute("innerHTML").encode("UTF-8"))
         convert_state = convert_state.replace('/', '-')
-        convert_state = convert_state.replace('\'', '')
+        convert_state = convert_state.replace('\'', ' ')
+        convert_state = convert_state.replace('*', '-')
+        convert_state = convert_state.replace('\"', '-')
+        convert_state = convert_state.replace(':', '-')
+        convert_state = convert_state.replace('\\', '-')
+        convert_state = convert_state.replace('|', '-')
+        convert_state = convert_state.replace('?', '-')
         item_split = re.findall('>([^\']*)<', convert_state)
         if len(item_split) == 0:
             append_item = 'you need to check the name'
         else:
             append_item = item_split[0]
         list_state.append(append_item)
-    state_href = list(zip(list_state_herf[2:], list_state))[1:0]# you may want to change this part since i ignore the All i n state
+    state_href = list(zip(list_state_herf[2:], list_state))[1:]# you may want to change this part since i ignore the All i n state
     print(state_href)
     for item in state_href:
         print(item)
@@ -84,8 +90,15 @@ def click_state_collect_jail(item, driver):
     for tr_jail in table_trs_jail:
         td = tr_jail.find_elements_by_xpath(".//td")
         convert_jail = str(td[0].get_attribute("innerHTML").encode("UTF-8"))
-        convert_jail = convert_jail.replace('/', ' ')
+        #convert_jail = re.sub(r'[\\/\:*"\|\.%\$\^&£]', '-', convert_jail)
+        convert_jail = convert_jail.replace('/', '-')
         convert_jail = convert_jail.replace('\'', ' ')
+        convert_jail = convert_jail.replace('*', '-')
+        convert_jail = convert_jail.replace('\\', '-')
+        convert_jail = convert_jail.replace('|', '-')
+        convert_jail = convert_jail.replace('\"', '-')
+        convert_jail = convert_jail.replace(':', '-')
+        convert_jail = convert_jail.replace('?', '-')
         item_split = re.findall('>([^\']*)<', convert_jail)
         if len(item_split) == 0:
             append_item = 'you need to check the name'
@@ -114,7 +127,7 @@ def processing_scrape(item,driver):
         item_split = re.findall('>([^\']*)<', convert_citizenship)
         convert_population = str(td[1].get_attribute("innerHTML").encode("UTF-8"))
         item_split_pop = re.findall('\'([^\']*)\'', convert_population)
-        data = {'Citizenship': item_split[0], 'Population': item_split_pop[0]}
+        data = {'Citizenship': item_split[0], 'Population': item_split_pop[0], 'Jail': item[1], 'State': item[2]}
         out_put = out_put.append(data, ignore_index=True)
     out_put.to_csv(item[2] + '-' +item[1] + '.csv')
     time.sleep(2)
